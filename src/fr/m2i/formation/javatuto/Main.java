@@ -3,8 +3,7 @@ package fr.m2i.formation.javatuto;
 import fr.m2i.formation.models.Group;
 import fr.m2i.formation.models.Student;
 
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Random;
 import java.util.Scanner;
 
 public class Main {
@@ -19,14 +18,26 @@ public class Main {
         int nbOfStudents = scanner.nextInt();
 
         //Création du tableau students avec valeurs null
-        Student[] students = new Student[nbOfStudents];
+        Student[] studentsStart = new Student[nbOfStudents];
 
         //Création des étudiants avec leur nom et leur id
         for(int i = 0; i < nbOfStudents; i++) {
             System.out.println("Entrer un nom");
             String nameInput = scanner.next();
-            students[i] = new Student(nameInput, i + 1);
+            studentsStart[i] = new Student(nameInput, i + 1);
         }
+
+        //Randomisation de la liste des étudiants
+        Student[] students = new Student[nbOfStudents];
+
+        int Temp = nbOfStudents;
+            do {
+                int randomIndex = new Random().nextInt(studentsStart.length);
+                if(students[randomIndex] == null) {
+                    students[randomIndex] = studentsStart[Temp -1];
+                    Temp--;
+                }
+            } while (Temp > 0);
 
 
         //Les groupes sont-ils pairs ? Nombre de groupes pairs.
@@ -48,23 +59,30 @@ public class Main {
         //Création du groupe de trois
         Group groupOfThree = new Group(3, 3, nbOfEvenGroups + 1);
 
-
-        for(int i = 0; i < nbOfStudents; i++) {
-            //Remplissage du groupe de trois
-            if(groupOfThree.getRemainingSpots() > 0) {
+        //Remplissage du groupe de trois
+        if(groupOfThree.getRemainingSpots() > 0 && nbOfStudents >= 5 && !isGroupEven) {
+            for(int i = 0; i < nbOfStudents; i++) {
                 students[i].setGroup(nbOfEvenGroups + 1);
                 groupOfThree.getStudentsInGroup().add(students[i]);
                 groupOfThree.minusOneRemainingSpot();
-            } else {
-                //Remplissage des groupes de deux
-                for(int j = 0; j < evenGroupArray.length; j++) {
-                    if(evenGroupArray[j].getRemainingSpots() > 0) {
-                        students[i].setGroup(evenGroupArray[j].getGroupId());
-                        evenGroupArray[j].minusOneRemainingSpot();
-                        evenGroupArray[j].getStudentsInGroup().add(students[i]);
-                    }
+             }
+        }
+
+        //Remplissage des groupes de deux
+        for (int i = 0; i < (nbOfStudents % 2 == 0 ? nbOfStudents : (nbOfStudents - 3)); i++) {
+            for (int j = 0; j < evenGroupArray.length; j++) {
+                if(evenGroupArray[j].getRemainingSpots() > 0 && !students[i].isAssginedGroup()) {
+                    students[i].setGroup(evenGroupArray[j].getGroupId());
+                    students[i].setAssginedGroup(true);
+                    evenGroupArray[j].minusOneRemainingSpot();
                 }
             }
+        }
+
+
+        //Affichage des groupes
+        for (int i = 0; i < nbOfStudents; i++) {
+            System.out.println(students[i].getName() + " est dans le groupe " + students[i].getGroup());
         }
 
 
